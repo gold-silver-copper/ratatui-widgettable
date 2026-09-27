@@ -395,3 +395,67 @@ fn scroll_padding_is_stable_across_renders() {
     StatefulWidget::render(&table, buf.area, &mut buf, &mut state);
     assert_eq!(offset_after_render, state.offset());
 }
+
+// Regression tests for bugs found by fuzzing (see fuzz/README.md). These also exist in ratatui's
+// table.
+
+#[test]
+fn tall_rows_do_not_overflow() {
+    let table = Table::new([Row::new(["a"]).height(u16::MAX)], [Constraint::Length(1)]);
+    let mut buf = Buffer::empty(Rect::new(0, 1, 5, 5));
+    Widget::render(table, buf.area, &mut buf);
+
+    let rows = [Row::new(["a"]).height(3), Row::new(["b"]).height(u16::MAX)];
+    let table = Table::new(rows, [Constraint::Length(1)]);
+    let mut buf = Buffer::empty(Rect::new(0, 0, 5, 5));
+    Widget::render(table, buf.area, &mut buf);
+}
+
+#[test]
+fn column_span_with_large_spacing_does_not_overflow() {
+    let rows = [Row::new([Cell::from("a").column_span(3)])];
+    let table = Table::new(rows, [Constraint::Length(1); 3]).column_spacing(u16::MAX);
+    let mut buf = Buffer::empty(Rect::new(0, 0, 5, 1));
+    Widget::render(table, buf.area, &mut buf);
+}
+
+/// Renders into the left 4 columns of a 10x3 buffer, to check nothing is drawn outside the table.
+fn render_narrow(table: Table, state: &mut TableState) -> Buffer {
+    let mut buf = Buffer::filled(Rect::new(0, 0, 10, 3), ratatui::buffer::Cell::new("."));
+    StatefulWidget::render(table, Rect::new(0, 0, 4, 1), &mut buf, state);
+    buf
+}
+
+#[test]
+fn wide_highlight_symbol_is_clipped_to_table() {
+    let table = Table::new([Row::new(["a"])], [Constraint::Length(1)]).highlight_symbol(">>>>>>");
+    let buf = render_narrow(table, &mut TableState::new().with_selected(Some(0)));
+    assert_eq!(
+        buf,
+        Buffer::with_lines([">>>>......", "..........", ".........."])
+    );
+}
+
+#[test]
+fn spanning_cell_is_clipped_to_table() {
+    let rows = [Row::new([Cell::from("abcdefghij").column_span(3)])];
+    let table = Table::new(rows, [Constraint::Length(3); 3]).column_spacing(3);
+    let buf = render_narrow(table, &mut TableState::new());
+    assert_eq!(
+        buf,
+        Buffer::with_lines(["abcd......", "..........", ".........."])
+    );
+}
+
+#[test]
+fn row_pushed_out_by_margin_is_not_rendered() {
+    // The row's top margin pushes it below the table, so its cell gets an empty area outside of
+    // the table. The cell must not be rendered there.
+    let rows = [Row::new([Cell::from_fn(|area, buf| {
+        buf.set_string(area.x, area.y, "x", Style::new());
+    })])
+    .top_margin(2)];
+    let table = Table::new(rows, [Constraint::Length(4)]);
+    let buf = render_narrow(table, &mut TableState::new());
+    assert_eq!(buf, Buffer::with_lines([".........."; 3]));
+}

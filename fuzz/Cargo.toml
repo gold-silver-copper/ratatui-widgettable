@@ -1,0 +1,36 @@
+[package]
+name = "ratatui-widgettable-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+arbitrary = { version = "1", features = ["derive"] }
+libfuzzer-sys = "0.4"
+ratatui-widgettable = { path = ".." }
+
+# The released versions of the ratatui crates, which ratatui-widgettable depends on
+ratatui-core = "0.1.2"
+ratatui-widgets = { version = "0.3.2", default-features = false }
+
+# The commit on ratatui's main branch that ratatui-widgettable was ported from, which includes
+# `Table::scroll_padding`
+main-core = { package = "ratatui-core", git = "https://github.com/ratatui/ratatui", rev = "54b6874357764219168c63eef2da26935b9a9609" }
+main-widgets = { package = "ratatui-widgets", git = "https://github.com/ratatui/ratatui", rev = "54b6874357764219168c63eef2da26935b9a9609", default-features = false }
+
+[[bin]]
+name = "differential"
+path = "fuzz_targets/differential.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "widgets"
+path = "fuzz_targets/widgets.rs"
+test = false
+doc = false
+bench = false

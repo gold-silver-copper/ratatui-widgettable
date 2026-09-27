@@ -100,6 +100,12 @@ clipped to it.
 `Widget` for a reference, as do `Text`, `Line`, and `Span`. To support this in your own widgets,
 implement `Widget for &MyWidget`.
 
+## Testing
+
+Besides unit tests, the table is fuzzed against ratatui's own `Table` to check that text-only tables
+render identically, and with random widget cells to check that nothing panics or draws outside the
+table. See [fuzz/README.md](fuzz/README.md).
+
 ## Compatibility
 
 - Ratatui 0.30 (`ratatui-core` 0.1 and `ratatui-widgets` 0.3)

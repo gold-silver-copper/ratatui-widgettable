@@ -221,6 +221,12 @@ impl<'a> Cell<'a> {
 
 impl Cell<'_> {
     pub(crate) fn render(&self, area: Rect, buf: &mut Buffer) {
+        // Cells of rows that don't fit in the table (e.g. because of a top margin) get an empty
+        // area which may be outside of the table. Some widgets (e.g. `&str`) write to the buffer
+        // at the position of the area even if it is empty, so these aren't rendered at all.
+        if area.is_empty() {
+            return;
+        }
         buf.set_style(area, self.style);
         self.content.render_ref(area, buf);
     }

@@ -913,8 +913,15 @@ impl Table<'_> {
             .skip(start_index)
             .take(end_index - start_index)
         {
-            let y = area.y + y_offset + row.top_margin;
-            let height = (y + row.height).min(area.bottom()).saturating_sub(y);
+            // saturating, as rows can extend past the end of the coordinate space
+            let y = area
+                .y
+                .saturating_add(y_offset)
+                .saturating_add(row.top_margin);
+            let height = y
+                .saturating_add(row.height)
+                .min(area.bottom())
+                .saturating_sub(y);
             let row_area = Rect { y, height, ..area };
             buf.set_style(row_area, row.style);
 
@@ -926,7 +933,7 @@ impl Table<'_> {
             if is_selected {
                 selected_row_area = Some(row_area);
             }
-            y_offset += row.height_with_margin();
+            y_offset = y_offset.saturating_add(row.height_with_margin());
         }
 
         let selected_column_area = state.selected_column().and_then(|s| {
@@ -976,7 +983,10 @@ impl Table<'_> {
                 self.column_spacing,
             ) {
                 let new_x = row_area.x + cell_area.x;
-                let area_to_render = Rect::new(new_x, row_area.y, cell_area.width, row_area.height);
+                // A cell spanning multiple columns can extend past the right edge of the table
+                // when the columns are squeezed, so it is clipped to the row
+                let area_to_render = Rect::new(new_x, row_area.y, cell_area.width, row_area.height)
+                    .intersection(row_area);
                 current_cell.render(area_to_render, buf);
             }
         }
@@ -990,10 +1000,12 @@ impl Table<'_> {
         row_area: Rect,
         row: &Row,
     ) {
+        // clipped to the row, in case the highlight symbol is wider than the table
         let selection_area = Rect {
             width: selection_width,
             ..row_area
-        };
+        }
+        .intersection(row_area);
         buf.set_style(selection_area, row.style);
         (&self.highlight_symbol).render(selection_area, buf);
     }
@@ -1025,11 +1037,13 @@ impl Table<'_> {
         let first = column_widths_iterator.next()?;
         let (n_columns_taken, all_columns_width) = column_widths_iterator
             .take((cell_column_span - 1).into())
-            .map(|rect| (1, rect.width))
-            .fold((1, first.width), |so_far, next_column| {
+            .map(|rect| (1, u32::from(rect.width)))
+            .fold((1, u32::from(first.width)), |so_far, next_column| {
                 (next_column.0 + so_far.0, next_column.1 + so_far.1)
             });
-        let width = all_columns_width + (n_columns_taken - 1) * column_spacing;
+        // computed as u32 and clamped, as a large column spacing can overflow u16
+        let width = all_columns_width + (n_columns_taken - 1) * u32::from(column_spacing);
+        let width = u16::try_from(width).unwrap_or(u16::MAX);
         Some(Rect::new(first.x, first.y, width, 1))
     }
 
@@ -1053,13 +1067,13 @@ impl Table<'_> {
         }
 
         let mut end = start;
-        let mut height = 0;
+        let mut height: u16 = 0;
 
         for item in self.rows.iter().skip(start) {
-            if height + item.height > area.height {
+            if height.saturating_add(item.height) > area.height {
                 break;
             }
-            height += item.height_with_margin();
+            height = height.saturating_add(item.height_with_margin());
             end += 1;
         }
 
