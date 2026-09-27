@@ -1,0 +1,26 @@
+[package]
+name = "ratatui-widgettable"
+version = "0.1.0"
+description = "A Ratatui table widget whose cells can contain any widget (Paragraph, Block, Gauge, ...)"
+documentation = "https://docs.rs/ratatui-widgettable"
+repository = "https://github.com/gold-silver-copper/ratatui-widgettable"
+readme = "README.md"
+keywords = ["ratatui", "table", "tui", "widget", "terminal"]
+categories = ["command-line-interface", "no-std"]
+license = "MIT"
+edition = "2024"
+rust-version = "1.88.0"
+include = ["/src", "/examples", "/tests", "/CHANGELOG.md", "/LICENSE", "/README.md"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dependencies]
+ratatui-core = "0.1.2"
+ratatui-widgets = { version = "0.3.2", default-features = false }
+
+[dev-dependencies]
+color-eyre = "0.6"
+crossterm = "0.29"
+pretty_assertions = "1"
+ratatui = "0.30.2"
