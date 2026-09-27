@@ -214,8 +214,8 @@ impl TableSpec {
 }
 
 impl TableSpec {
-    /// Limits the column constraints and spacing, as extreme values (e.g. huge ratios) can make
-    /// ratatui's layout solver run for minutes.
+    /// Limits the column constraints and spacing, as values tens of thousands of cells wide can
+    /// make ratatui's layout solver hang or panic on some runs. See `docs/fuzzing-findings.md`.
     pub fn stable_layout(mut self) -> Self {
         for width in &mut self.widths {
             *width = match *width {

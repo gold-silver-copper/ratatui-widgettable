@@ -104,7 +104,8 @@ implement `Widget for &MyWidget`.
 
 Besides unit tests, the table is fuzzed against ratatui's own `Table` to check that text-only tables
 render identically, and with random widget cells to check that nothing panics or draws outside the
-table. See [fuzz/README.md](fuzz/README.md).
+table. See [fuzz/README.md](fuzz/README.md), and [docs/fuzzing-findings.md](docs/fuzzing-findings.md)
+for the bugs it found.
 
 ## Compatibility
 

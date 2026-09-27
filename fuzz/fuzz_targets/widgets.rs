@@ -72,7 +72,7 @@ fuzz_target!(|input: Input| {
     } = input;
     // percentages over 100 are documented to panic when creating the table
     // percentages over 100 are documented to panic when creating the table, and extreme column
-    // constraints can make ratatui's layout solver very slow
+    // constraints can make ratatui's layout solver hang or panic
     let mut spec = spec.bounded().valid_percentages().stable_layout();
     let mut nested = nested.bounded().valid_percentages().stable_layout();
     let mut scroll_padding = scroll_padding;

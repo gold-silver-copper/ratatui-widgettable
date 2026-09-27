@@ -26,12 +26,16 @@ cores.
 
 ## Known limitations
 
+These are described in detail, with reproductions, in
+[docs/fuzzing-findings.md](../docs/fuzzing-findings.md).
+
 - When the header and footer don't fit in the table, ratatui's layout solver resolves the
   conflicting constraints nondeterministically (the same input can give the space to the header in
   one run and the footer in the next). The `differential` target skips these inputs, and the
   `widgets` target doesn't require repeated renders to produce the same output.
-- Extreme column constraints (e.g. huge ratios) can make ratatui's layout solver run for minutes,
-  so column constraints and spacing are limited to realistic values.
+- Column constraints tens of thousands of cells wide can make ratatui's layout solver hang or panic
+  with `InternalSolverError(ObjectiveUnbounded)` on some runs, so column constraints and spacing are
+  limited to realistic values.
 - ratatui's table panics with arithmetic overflow for some extreme sizes (e.g. rows `u16::MAX`
   lines tall), which this crate fixes. The `differential` target accepts this crate not panicking
   where ratatui does.
