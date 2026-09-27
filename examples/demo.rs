@@ -164,7 +164,7 @@ impl Task {
         let activity = if self.status == Status::Running {
             // a cheap pseudo random number so that the sparklines look interesting
             let noise = (tick * 7 + self.id * 13) % 10;
-            self.set_progress(self.progress + self.speed * (noise as f64 + 1.0) / 5.0);
+            self.set_progress(self.progress + self.speed * (noise as f64 + 1.0) / 15.0);
             noise as u64 + 1
         } else {
             0

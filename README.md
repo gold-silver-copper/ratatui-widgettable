@@ -10,6 +10,8 @@ Ratatui's built-in `Table` only supports `Text` in its cells. This crate provide
 same API and rendering behavior, where each `Cell` can hold a `Paragraph` (e.g. with wrapping), a
 `Block`, a `Gauge`, a `List`, a `Chart`, another `Table`, or any other widget.
 
+![Demo of a table with wrapped paragraphs, gauges and sparklines in its cells](assets/demo.webp)
+
 ## Installation
 
 ```shell
@@ -40,10 +42,30 @@ let table = Table::new(rows, widths)
     .block(Block::bordered().title("Jobs"));
 ```
 
-Run the interactive demo with `cargo run --example demo`. It shows a live task list with wrapped
-paragraphs, gauges and sparklines in the cells. You can change the selected row and column, sort,
-expand rows, and add or delete tasks. Mouse support (clicking a cell or header) is built with
-`Cell::from_fn`, which records where each cell was rendered.
+## Demo
+
+Run the interactive demo shown above with `cargo run --example demo`. It shows a live task list
+with wrapped paragraphs, gauges and sparklines in the cells:
+
+| Key | Action |
+| --- | --- |
+| `↑`/`↓`, `j`/`k`, `g`/`G` | Select a row, or the first/last row |
+| `←`/`→`, `h`/`l` | Select a column |
+| `space` | Start or pause the selected task |
+| `+`/`-` | Change the progress of the selected task |
+| `enter` | Expand or collapse the selected row |
+| `s` | Sort by the selected column (press again to reverse) |
+| `a`/`d`/`r` | Add, delete, or reset a task |
+| `p` | Cycle the scroll padding |
+| `q` | Quit |
+
+You can also scroll with the mouse, click a cell to select it, and click a header to sort by that
+column. The mouse support is built with `Cell::from_fn`, which records where each cell was
+rendered.
+
+The animation is recorded with [betamax] using `assets/record.sh`.
+
+[betamax]: https://github.com/joshka/betamax
 
 ## Migrating from ratatui's `Table`
 
