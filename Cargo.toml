@@ -15,12 +15,17 @@ include = ["/src", "/examples", "/tests", "/CHANGELOG.md", "/LICENSE", "/README.
 [package.metadata.docs.rs]
 all-features = true
 
+# The minimum versions are the ones used by ratatui 0.30.0, so that applications on any ratatui 0.30.x
+# release can use this crate without updating their dependencies. Types from these crates are part of
+# this crate's API (e.g. `TableState`, `Block`, `Widget`), so the requirements must not span
+# semver-incompatible versions: supporting a new ratatui release that bumps them is a breaking change.
 [dependencies]
-ratatui-core = "0.1.2"
-ratatui-widgets = { version = "0.3.2", default-features = false }
+ratatui-core = "0.1.0"
+ratatui-widgets = { version = "0.3.0", default-features = false }
 
 [dev-dependencies]
 color-eyre = "0.6"
 crossterm = "0.29"
 pretty_assertions = "1"
+# 0.30.2 for `Cell::column_span`, which the parity tests use on ratatui's table
 ratatui = "0.30.2"
