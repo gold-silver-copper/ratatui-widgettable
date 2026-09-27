@@ -389,7 +389,7 @@ dependencies = [
 
 [[package]]
 name = "ratatui-widgettable"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "ratatui-core 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ratatui-widgets 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
